@@ -14,7 +14,7 @@ import importlib.util
 spec = importlib.util.spec_from_file_location(
     "cpm", "/workspaces/Project-1/CPM Calculator.py"
 )
-cpm = importlib.util.load_module_from_spec(spec)
+cpm = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(cpm)
 
 tasks      = cpm.tasks
