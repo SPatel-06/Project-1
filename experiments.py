@@ -9,13 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
 # Import everything from your main model file
-# Note: if your file has a space in the name, this handles it
-import importlib.util
-spec = importlib.util.spec_from_file_location(
-    "cpm", "/workspaces/Project-1/CPM Calculator.py"
-)
-cpm = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(cpm)
+import cpm_calculator as cpm
 
 tasks      = cpm.tasks
 task_names = cpm.task_names
