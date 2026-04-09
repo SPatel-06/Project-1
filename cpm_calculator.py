@@ -287,134 +287,136 @@ def compute_cpm(tasks, use_expected=True):
 # Run the baseline model
 # ============================================================
 
-ES, EF, LS, LF, slack, critical_path, duration, durations = compute_cpm(tasks, use_expected=True)
+if __name__ == "__main__":
 
-print("=" * 65)
-print("APP LAUNCH PROJECT — BASELINE CPM RESULTS (PERT Expected)")
-print("=" * 65)
-print(f"\nProject Duration: {duration:.1f} days\n")
-print(f"{'Task':<6} {'Name':<25} {'Exp.Dur':<9} {'ES':<6} {'EF':<6} {'Slack':<7} {'Critical?'}")
-print("-" * 65)
+    ES, EF, LS, LF, slack, critical_path, duration, durations = compute_cpm(tasks, use_expected=True)
 
-for t in ['A','B','C','D','E','F','G','H','I','J']:
-    crit = "YES ***" if t in critical_path else ""
-    print(f"{t:<6} {task_names[t]:<25} {durations[t]:<9.1f} {ES[t]:<6.1f} {EF[t]:<6.1f} {slack[t]:<7.1f} {crit}")
+    print("=" * 65)
+    print("APP LAUNCH PROJECT — BASELINE CPM RESULTS (PERT Expected)")
+    print("=" * 65)
+    print(f"\nProject Duration: {duration:.1f} days\n")
+    print(f"{'Task':<6} {'Name':<25} {'Exp.Dur':<9} {'ES':<6} {'EF':<6} {'Slack':<7} {'Critical?'}")
+    print("-" * 65)
 
-print(f"\nCritical Path: {' → '.join(critical_path)}")
-print(f"Project Duration: {duration:.1f} days")
+    for t in ['A','B','C','D','E','F','G','H','I','J']:
+        crit = "YES ***" if t in critical_path else ""
+        print(f"{t:<6} {task_names[t]:<25} {durations[t]:<9.1f} {ES[t]:<6.1f} {EF[t]:<6.1f} {slack[t]:<7.1f} {crit}")
 
-# ============================================================
-# Extension 2 — Crashing Analysis
-# ============================================================
+    print(f"\nCritical Path: {' → '.join(critical_path)}")
+    print(f"Project Duration: {duration:.1f} days")
 
-print("\n" + "=" * 65)
-print("EXTENSION 2 — CRASHING ANALYSIS")
-print("=" * 65)
+    # ============================================================
+    # Extension 2 — Crashing Analysis
+    # ============================================================
 
-target = 5
-crashed_tasks, crash_cost, crash_log, days_crashed = least_cost_crashing(
-    tasks, target, crash_info
-)
+    print("\n" + "=" * 65)
+    print("EXTENSION 2 — CRASHING ANALYSIS")
+    print("=" * 65)
 
-ES2, EF2, LS2, LF2, slack2, cp2, duration2, durations2 = compute_cpm(
-    crashed_tasks, use_expected=True
-)
+    target = 5
+    crashed_tasks, crash_cost, crash_log, days_crashed = least_cost_crashing(
+        tasks, target, crash_info
+    )
 
-print(f"\nTarget reduction : {target} days")
-print(f"Original duration: {duration:.1f} days")
-print(f"Crashed duration : {duration2:.1f} days")
-print(f"Days saved       : {duration - duration2:.1f} days")
-print(f"Total crash cost : ${crash_cost:,}")
+    ES2, EF2, LS2, LF2, slack2, cp2, duration2, durations2 = compute_cpm(
+        crashed_tasks, use_expected=True
+    )
 
-print(f"\n{'Step':<6} {'Task':<6} {'Name':<25} {'Cost/Day':<10} {'Total Cost'}")
-print("-" * 60)
-for i, (t, name, cpd, tc) in enumerate(crash_log, 1):
-    print(f"{i:<6} {t:<6} {name:<25} ${cpd:<9,} ${tc:,}")
+    print(f"\nTarget reduction : {target} days")
+    print(f"Original duration: {duration:.1f} days")
+    print(f"Crashed duration : {duration2:.1f} days")
+    print(f"Days saved       : {duration - duration2:.1f} days")
+    print(f"Total crash cost : ${crash_cost:,}")
 
-print(f"\nNew Critical Path: {' → '.join(cp2)}")
+    print(f"\n{'Step':<6} {'Task':<6} {'Name':<25} {'Cost/Day':<10} {'Total Cost'}")
+    print("-" * 60)
+    for i, (t, name, cpd, tc) in enumerate(crash_log, 1):
+        print(f"{i:<6} {t:<6} {name:<25} ${cpd:<9,} ${tc:,}")
 
-# ============================================================
-# Extension 3 — Random Task Delays
-# ============================================================
+    print(f"\nNew Critical Path: {' → '.join(cp2)}")
 
-print("\n" + "=" * 65)
-print("EXTENSION 3 — RANDOM TASK DELAYS")
-print("=" * 65)
+    # ============================================================
+    # Extension 3 — Random Task Delays
+    # ============================================================
 
-random.seed(42)
+    print("\n" + "=" * 65)
+    print("EXTENSION 3 — RANDOM TASK DELAYS")
+    print("=" * 65)
 
-for scenario in range(1, 4):
-    delayed_tasks, delay_log = apply_delays(tasks, delay_info)
-    _, _, _, _, _, cp3, duration3, _ = compute_cpm(delayed_tasks, use_expected=True)
+    random.seed(42)
 
-    print(f"\n--- Scenario {scenario} ---")
-    if delay_log:
-        print("  Delays occurred:")
-        for t, name, extra in delay_log:
-            print(f"    {t} ({name}): +{extra} days")
-    else:
-        print("  No delays occurred this scenario")
+    for scenario in range(1, 4):
+        delayed_tasks, delay_log = apply_delays(tasks, delay_info)
+        _, _, _, _, _, cp3, duration3, _ = compute_cpm(delayed_tasks, use_expected=True)
 
-    print(f"  Project duration : {duration3:.1f} days")
-    print(f"  Critical path    : {' → '.join(cp3)}")
-    print(f"  vs baseline      : {duration3 - duration:.1f} days longer")
+        print(f"\n--- Scenario {scenario} ---")
+        if delay_log:
+            print("  Delays occurred:")
+            for t, name, extra in delay_log:
+                print(f"    {t} ({name}): +{extra} days")
+        else:
+            print("  No delays occurred this scenario")
 
-# ============================================================
-# Extension 4 — Budget Tracking
-# ============================================================
+        print(f"  Project duration : {duration3:.1f} days")
+        print(f"  Critical path    : {' → '.join(cp3)}")
+        print(f"  vs baseline      : {duration3 - duration:.1f} days longer")
 
-print("\n" + "=" * 65)
-print("EXTENSION 4 — BUDGET TRACKING")
-print("=" * 65)
+    # ============================================================
+    # Extension 4 — Budget Tracking
+    # ============================================================
 
-total_cost, budget_breakdown = compute_budget(tasks, task_costs, durations)
+    print("\n" + "=" * 65)
+    print("EXTENSION 4 — BUDGET TRACKING")
+    print("=" * 65)
 
-print(f"\n{'Task':<6} {'Name':<25} {'Duration':<10} {'Fixed':<10} {'Daily':<10} {'Total'}")
-print("-" * 70)
+    total_cost, budget_breakdown = compute_budget(tasks, task_costs, durations)
 
-for t in ['A','B','C','D','E','F','G','H','I','J']:
-    b = budget_breakdown[t]
-    print(f"{t:<6} {task_names[t]:<25} {b['duration']:<10.1f} ${b['fixed']:<9,} ${b['daily_rate']:<9,} ${b['total']:,.0f}")
+    print(f"\n{'Task':<6} {'Name':<25} {'Duration':<10} {'Fixed':<10} {'Daily':<10} {'Total'}")
+    print("-" * 70)
 
-print(f"\nTotal Project Budget : ${total_cost:,.0f}")
-print(f"Project Duration     : {duration:.1f} days")
-print(f"Average Cost/Day     : ${total_cost/duration:,.0f}")
-print(f"\nBudget without crashing : ${total_cost:,.0f}")
-print(f"Crash cost added        : ${crash_cost:,}")
-print(f"Total with crashing     : ${total_cost + crash_cost:,.0f}")
-print(f"Time saved by crashing  : {duration - duration2:.1f} days")
+    for t in ['A','B','C','D','E','F','G','H','I','J']:
+        b = budget_breakdown[t]
+        print(f"{t:<6} {task_names[t]:<25} {b['duration']:<10.1f} ${b['fixed']:<9,} ${b['daily_rate']:<9,} ${b['total']:,.0f}")
 
-# ============================================================
-# Extension 5 — Monte Carlo Simulation
-# ============================================================
+    print(f"\nTotal Project Budget : ${total_cost:,.0f}")
+    print(f"Project Duration     : {duration:.1f} days")
+    print(f"Average Cost/Day     : ${total_cost/duration:,.0f}")
+    print(f"\nBudget without crashing : ${total_cost:,.0f}")
+    print(f"Crash cost added        : ${crash_cost:,}")
+    print(f"Total with crashing     : ${total_cost + crash_cost:,.0f}")
+    print(f"Time saved by crashing  : {duration - duration2:.1f} days")
 
-print("\n" + "=" * 65)
-print("EXTENSION 5 — MONTE CARLO SIMULATION (1,000 runs)")
-print("=" * 65)
+    # ============================================================
+    # Extension 5 — Monte Carlo Simulation
+    # ============================================================
 
-random.seed(99)
-sim_durations, cp_counts = monte_carlo(tasks, n_simulations=1000)
+    print("\n" + "=" * 65)
+    print("EXTENSION 5 — MONTE CARLO SIMULATION (1,000 runs)")
+    print("=" * 65)
 
-sim_array = np.array(sim_durations)
+    random.seed(99)
+    sim_durations, cp_counts = monte_carlo(tasks, n_simulations=1000)
 
-print(f"\nProject Duration Statistics (over 1,000 simulations):")
-print(f"  Mean duration      : {np.mean(sim_array):.1f} days")
-print(f"  Median duration    : {np.median(sim_array):.1f} days")
-print(f"  Std deviation      : {np.std(sim_array):.1f} days")
-print(f"  Minimum            : {np.min(sim_array):.1f} days")
-print(f"  Maximum            : {np.max(sim_array):.1f} days")
-print(f"  10th percentile    : {np.percentile(sim_array, 10):.1f} days")
-print(f"  90th percentile    : {np.percentile(sim_array, 90):.1f} days")
+    sim_array = np.array(sim_durations)
 
-# Probability of finishing by certain deadlines
-for deadline in [30, 33, 35, 38, 40]:
-    prob = np.mean(sim_array <= deadline) * 100
-    print(f"  P(finish <= {deadline} days): {prob:.1f}%")
+    print(f"\nProject Duration Statistics (over 1,000 simulations):")
+    print(f"  Mean duration      : {np.mean(sim_array):.1f} days")
+    print(f"  Median duration    : {np.median(sim_array):.1f} days")
+    print(f"  Std deviation      : {np.std(sim_array):.1f} days")
+    print(f"  Minimum            : {np.min(sim_array):.1f} days")
+    print(f"  Maximum            : {np.max(sim_array):.1f} days")
+    print(f"  10th percentile    : {np.percentile(sim_array, 10):.1f} days")
+    print(f"  90th percentile    : {np.percentile(sim_array, 90):.1f} days")
 
-print(f"\nCritical Path Task Frequencies (how often each task was critical):")
-print(f"{'Task':<6} {'Name':<25} {'Frequency':<10} {'% of runs'}")
-print("-" * 55)
-for t in ['A','B','C','D','E','F','G','H','I','J']:
-    freq = cp_counts[t]
-    pct = freq / 1000 * 100
-    print(f"{t:<6} {task_names[t]:<25} {freq:<10} {pct:.1f}%")
+    # Probability of finishing by certain deadlines
+    for deadline in [30, 33, 35, 38, 40]:
+        prob = np.mean(sim_array <= deadline) * 100
+        print(f"  P(finish <= {deadline} days): {prob:.1f}%")
+
+    print(f"\nCritical Path Task Frequencies (how often each task was critical):")
+    print(f"{'Task':<6} {'Name':<25} {'Frequency':<10} {'% of runs'}")
+    print("-" * 55)
+    for t in ['A','B','C','D','E','F','G','H','I','J']:
+        freq = cp_counts[t]
+        pct = freq / 1000 * 100
+        print(f"{t:<6} {task_names[t]:<25} {freq:<10} {pct:.1f}%")
